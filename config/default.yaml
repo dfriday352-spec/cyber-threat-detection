@@ -1,0 +1,351 @@
+# Cyber Threat Detection System - Default Configuration
+
+# Application Settings
+app:
+  name: "Cyber Threat Detection System"
+  version: "1.0.0"
+  debug: false
+  log_level: "INFO"
+  environment: "production"
+
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  timeout: 30
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:8000"
+  enable_swagger: true
+  enable_redoc: true
+
+# Database Configuration
+database:
+  engine: "postgresql"
+  host: "localhost"
+  port: 5432
+  name: "threat_detection"
+  user: "threat_user"
+  password: "secure_password"
+  pool_size: 20
+  max_overflow: 40
+  echo: false
+  ssl_mode: "prefer"
+
+# Cache Configuration
+cache:
+  engine: "redis"
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: null
+  ttl: 3600
+  max_connections: 50
+
+# Logging Configuration
+logging:
+  format: "json"
+  level: "INFO"
+  handlers:
+    - type: "console"
+      format: "json"
+    - type: "file"
+      path: "logs/app.log"
+      format: "json"
+      rotation: "100MB"
+      retention: "30 days"
+      max_bytes: 104857600
+      backup_count: 10
+
+# Detection Settings
+detection:
+  # Threat score calculation weights (must sum to 1.0)
+  weights:
+    signature: 0.25
+    anomaly: 0.25
+    behavioral: 0.25
+    ml: 0.25
+
+  # Severity thresholds for threat scoring
+  thresholds:
+    critical: 90
+    high: 70
+    medium: 50
+    low: 30
+
+  # Feature extraction settings
+  features:
+    extraction_window: 300  # seconds
+    normalization: true
+    scaling_method: "standard"  # standard, minmax
+    feature_cache_ttl: 3600
+
+  # Detection sensitivity
+  sensitivity: "medium"  # low, medium, high, custom
+
+  # Anomaly detection settings
+  anomaly:
+    contamination_rate: 0.05
+    min_samples: 10
+    sensitivity: 0.8
+
+# Machine Learning Configuration
+ml:
+  models:
+    # Anomaly Detection Model
+    anomaly_detection:
+      type: "isolation_forest"
+      enabled: true
+      contamination: 0.05
+      n_estimators: 100
+      random_state: 42
+
+    # Behavioral Analysis Model
+    behavioral_analysis:
+      type: "lstm"
+      enabled: true
+      sequence_length: 50
+      embedding_dim: 64
+      lstm_units: 128
+      dropout: 0.2
+      epochs: 10
+      batch_size: 32
+
+    # Threat Classification Model
+    threat_classification:
+      type: "xgboost"
+      enabled: true
+      n_estimators: 100
+      max_depth: 8
+      learning_rate: 0.1
+      subsample: 0.8
+
+  # Model training settings
+  training:
+    enabled: true
+    schedule: "weekly"  # hourly, daily, weekly, monthly
+    min_samples_required: 1000
+    validation_split: 0.2
+    test_split: 0.1
+
+  # Model serving
+  serving:
+    batch_size: 32
+    timeout_ms: 5000
+    use_gpu: false
+
+# Explainability (XAI) Configuration
+explainability:
+  enabled: true
+  methods:
+    - "shap"
+    - "lime"
+    - "feature_importance"
+  num_features_to_explain: 10
+  background_samples: 100
+
+# Response Actions Configuration
+response:
+  # Execute automatically or require approval
+  auto_execute: false
+  execution_timeout: 300  # seconds
+  
+  actions:
+    # Alert/Notification Action
+    alert:
+      enabled: true
+      channels:
+        - "email"
+        - "slack"
+        - "syslog"
+      default_severity_threshold: "medium"
+    
+    # Isolate Action
+    isolate:
+      enabled: true
+      default_duration: 300  # seconds
+      preserve_logs: true
+      alert_user: true
+    
+    # Contain Action
+    contain:
+      enabled: true
+      rate_limit: "1000pps"
+      duration: 600  # seconds
+    
+    # Block Action
+    block:
+      enabled: true
+      persist: false
+      duration: 3600  # seconds
+    
+    # Investigate Action
+    investigate:
+      enabled: true
+      collect_forensics: true
+      capture_traffic: true
+    
+    # Remediate Action
+    remediate:
+      enabled: false
+      approve_required: true
+      execute_remediation_scripts: false
+
+# Security Configuration
+security:
+  auth_type: "oauth2"
+  oauth2:
+    provider: "keycloak"
+    client_id: "threat-detection-app"
+    client_secret: "your-secret-here"
+    token_url: "http://localhost:8080/auth/token"
+  
+  jwt:
+    algorithm: "HS256"
+    secret_key: "your-jwt-secret-key-change-me"
+    token_expiry: 3600
+    refresh_token_expiry: 86400
+  
+  tls:
+    enabled: true
+    cert_path: "/etc/certs/server.crt"
+    key_path: "/etc/certs/server.key"
+    min_version: "TLSv1.2"
+  
+  rbac:
+    enabled: true
+    roles:
+      - name: "admin"
+        permissions: ["*"]
+      - name: "analyst"
+        permissions: ["read:threats", "write:comments", "execute:safe_actions"]
+      - name: "viewer"
+        permissions: ["read:*"]
+
+# External Integrations
+integrations:
+  # Threat Intelligence Feeds
+  threat_feeds:
+    - name: "abuse_ch_urlhaus"
+      url: "https://urlhaus.abuse.ch/downloads/csv_recent/"
+      enabled: true
+      refresh_interval: 3600
+      feed_type: "malicious_urls"
+    
+    - name: "alienvault_otx"
+      url: "https://otx.alienvault.com/api/v1/pulses/subscribed"
+      enabled: true
+      api_key: "${ALIENVAULT_API_KEY}"
+      refresh_interval: 3600
+      feed_type: "iocs"
+    
+    - name: "abuse_ch_malware"
+      url: "https://sslbl.abuse.ch/feed/"
+      enabled: true
+      refresh_interval: 3600
+      feed_type: "malware_hashes"
+
+  # SIEM Integration
+  siem:
+    enabled: false
+    type: "splunk"  # splunk, elasticsearch, sumologic
+    connection:
+      host: "siem.example.com"
+      port: 8088
+      token: "${SIEM_TOKEN}"
+    ssl_verify: true
+
+  # Incident Response
+  incident_response:
+    enabled: false
+    type: "servicenow"  # servicenow, jira
+    connection:
+      url: "https://dev123456.service-now.com"
+      api_key: "${INCIDENT_API_KEY}"
+
+  # Slack Notifications
+  slack:
+    enabled: false
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#security-alerts"
+    mention_on_critical: true
+
+  # Email Notifications
+  email:
+    enabled: true
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    username: "${EMAIL_USERNAME}"
+    password: "${EMAIL_PASSWORD}"
+    from_address: "alerts@example.com"
+    use_tls: true
+
+# Data Retention Policy
+data_retention:
+  threat_events: 90  # days
+  audit_logs: 365    # days
+  raw_events: 30     # days
+  archived_data: 730 # days
+  auto_cleanup: true
+  cleanup_schedule: "daily"  # daily, weekly
+
+# Performance Tuning
+performance:
+  # Event Processing
+  event_batch_size: 100
+  event_processing_timeout: 30  # seconds
+  max_queue_size: 10000
+
+  # Database Optimization
+  db_connection_pool_size: 20
+  db_query_timeout: 30  # seconds
+  db_slow_query_threshold: 1000  # ms
+
+  # Cache Configuration
+  cache_ttl: 3600
+  cache_max_size: 10000
+
+  # Threading
+  worker_threads: 4
+  max_thread_pool_size: 20
+
+# Monitoring & Observability
+monitoring:
+  # Prometheus Metrics
+  prometheus:
+    enabled: true
+    port: 8001
+    path: "/metrics"
+
+  # Health Checks
+  health_check:
+    enabled: true
+    interval: 60  # seconds
+    timeout: 10   # seconds
+
+  # Tracing
+  tracing:
+    enabled: false
+    jaeger:
+      agent_host: "localhost"
+      agent_port: 6831
+      sampler_type: "probabilistic"
+      sampler_param: 0.1
+
+  # Alerting Thresholds
+  alerts:
+    high_latency_threshold: 5000  # ms
+    error_rate_threshold: 0.05    # 5%
+    queue_size_threshold: 5000
+    memory_threshold: 0.85        # 85% of max
+
+# Feature Flags
+features:
+  enable_ml_models: true
+  enable_behavioral_analysis: true
+  enable_explainability: true
+  enable_auto_response: false
+  enable_threat_intelligence: true
+  enable_threat_correlation: true
+  beta_features: false
