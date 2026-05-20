@@ -1,0 +1,173 @@
+# AI-Driven Autonomous Cyber Threat Detection Configuration
+
+# Database Configuration
+database:
+  host: localhost
+  port: 5432
+  name: threat_detection
+  user: threat_user
+  password: secure_password_change_me
+  pool_size: 20
+  max_overflow: 40
+
+# Redis Configuration
+redis:
+  host: localhost
+  port: 6379
+  db: 0
+  password: null
+  ttl: 3600
+
+# Kafka Configuration
+kafka:
+  bootstrap_servers:
+    - localhost:9092
+  topics:
+    events: security_events
+    threats: detected_threats
+    responses: response_actions
+  consumer_group: threat_detector
+  batch_size: 100
+  batch_timeout: 5
+
+# Threat Detection Configuration
+threat_detection:
+  # Model paths
+  models:
+    signature_db: models/signature_database.pkl
+    anomaly_detector: models/anomaly_detector.h5
+    threat_classifier: models/threat_classifier.pt
+    
+  # Detection thresholds
+  thresholds:
+    high_risk: 0.9
+    medium_risk: 0.7
+    low_risk: 0.5
+    anomaly_score: 0.85
+    
+  # Feature extraction
+  features:
+    time_window: 300  # seconds
+    feature_count: 128
+    normalization: z_score
+
+# Explainability Configuration
+explainability:
+  framework: shap  # Options: shap, lime, both
+  shap:
+    explainer_type: tree  # Options: tree, kernel, gradient
+    sample_size: 100
+  lime:
+    num_features: 10
+    num_samples: 1000
+  
+  # Store explanations
+  store_explanations: true
+  retention_days: 90
+
+# Autonomous Response Configuration
+response_engine:
+  enabled: true
+  
+  # Response actions
+  actions:
+    isolate_host:
+      enabled: true
+      timeout: 30
+    block_ip:
+      enabled: true
+      whitelist: []
+    terminate_process:
+      enabled: true
+      timeout: 10
+    quarantine_file:
+      enabled: true
+      destination: /quarantine
+    alert_soc:
+      enabled: true
+      endpoint: https://soc.example.com/api/alerts
+  
+  # Response policies by threat level
+  policies:
+    critical:
+      - isolate_host
+      - alert_soc
+    high:
+      - block_ip
+      - alert_soc
+    medium:
+      - alert_soc
+    low:
+      - log_event
+
+# Logging Configuration
+logging:
+  level: INFO
+  format: json
+  file: logs/app.log
+  max_size_mb: 100
+  backup_count: 10
+
+# API Configuration
+api:
+  host: 0.0.0.0
+  port: 8000
+  workers: 4
+  max_connections: 1000
+  request_timeout: 30
+  
+  # Security
+  cors:
+    origins: ["*"]
+    allow_credentials: true
+    allow_methods: ["*"]
+    allow_headers: ["*"]
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 100
+
+# Monitoring & Observability
+monitoring:
+  prometheus:
+    enabled: true
+    port: 8001
+    metrics_interval: 60
+  
+  opentelemetry:
+    enabled: true
+    jaeger_endpoint: http://localhost:6831
+
+# Model Training
+training:
+  data_path: data/training/
+  batch_size: 32
+  epochs: 100
+  validation_split: 0.2
+  
+  # Model checkpoint
+  checkpoint_dir: models/checkpoints/
+  save_interval: 5  # epochs
+  early_stopping:
+    enabled: true
+    patience: 10
+    metric: val_loss
+
+# Feature Engineering
+feature_engineering:
+  preprocessing:
+    - normalize
+    - remove_outliers
+    - handle_missing_values
+  
+  selection:
+    method: mutual_information
+    top_k: 50
+
+# Performance Tuning
+performance:
+  enable_gpu: true
+  batch_processing: true
+  cache_predictions: true
+  parallel_workers: 4
