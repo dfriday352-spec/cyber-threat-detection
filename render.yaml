@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: cyber-threat-detection-api
+    runtime: docker
+    region: oregon
+    plan: standard
+    envVars:
+      - key: DATABASE_URL
+        scope: run
+      - key: REDIS_URL
+        scope: run
+      - key: KAFKA_SERVERS
+        value: localhost:9092
+      - key: FLASK_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: API_PORT
+        value: 8000
+      - key: SECRET_KEY
+        scope: run
+
+databases:
+  - name: threat-detection-postgres
+    databaseName: threat_detection
+    user: threat_user
+    region: oregon
